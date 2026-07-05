@@ -1,7 +1,7 @@
 import pytest
 
 from app.security.path_guard import PathAccessError, assert_tool_permitted, guard_read_path
-from app.tools.filesystem_tools import read_file
+from app.tools.filesystem_tools import read_file_impl as read_file
 
 
 @pytest.fixture
@@ -18,15 +18,18 @@ def workspace(tmp_path):
 def test_allows_file_inside_workspace(workspace):
     path = guard_read_path("README.md", workspace_root=workspace)
     assert path.name == "README.md"
-    assert read_file("README.md", workspace_root=workspace) == "# Demo"
+    result = read_file("README.md", workspace_root=workspace)
+    assert result["status"] == "success"
+    assert result["content"] == "# Demo"
 
 
 def test_rejects_env_file_even_inside_workspace(workspace):
     with pytest.raises(PathAccessError, match="sensitive file"):
         guard_read_path(".env", workspace_root=workspace)
 
-    with pytest.raises(PathAccessError, match="sensitive file"):
-        read_file(".env", workspace_root=workspace)
+    result = read_file(".env", workspace_root=workspace)
+    assert result["status"] == "error"
+    assert "sensitive file" in result["content"]
 
 
 def test_rejects_path_outside_workspace(workspace):
@@ -38,8 +41,8 @@ def test_rejects_windows_system_path(workspace):
     with pytest.raises(PathAccessError, match="system path|outside the configured workspace"):
         guard_read_path(r"C:\Windows\System32\drivers\etc\hosts", workspace_root=workspace)
 
-    with pytest.raises(PathAccessError, match="system path|outside the configured workspace"):
-        read_file(r"C:\Windows\System32\drivers\etc\hosts", workspace_root=workspace)
+    result = read_file(r"C:\Windows\System32\drivers\etc\hosts", workspace_root=workspace)
+    assert result["status"] == "error"
 
 
 def test_rejects_forbidden_tools():

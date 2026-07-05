@@ -69,7 +69,7 @@ Open [http://localhost:5173](http://localhost:5173)
 - [x] **Step 1** — Monorepo scaffold (FastAPI + React)
 - [x] **Step 2** — Workspace config & settings API
 - [x] **Step 3** — Path safety layer
-- [ ] Step 4 — Filesystem tools
+- [x] **Step 4** — Filesystem tools
 - [ ] Step 5–6 — LangGraph agent
 - [ ] Step 7–9 — Chat UI
 - [ ] Step 10–11 — MCP & GitHub tools
